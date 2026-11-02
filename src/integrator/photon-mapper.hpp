@@ -106,7 +106,7 @@ namespace Integrator {
 			, max_path_length( config.max_path_length )
 			, n_global_sample( n_global_sample )
 			, n_global_gather( n_global_gather )
-			, f_high_importance ( f_high_importance )
+			, f_high_importance( f_high_importance )
 			, n_caustic_sample( n_caustic_sample )
 			, n_caustic_gather( n_global_gather )
 			, n_final_gathering( n_final_gathering ) {
@@ -128,24 +128,15 @@ namespace Integrator {
 			// Trace global photons
 			for ( std::uint32_t sample{ 0 }; sample < n_global_sample; ++sample )
 				TraceEmission( false );
-
 			// Build global photon maps
-			if ( global_photon.size() )
-				global_kdtree.build( global_photon );
-
-			if ( !global_photon.size() && !f_high_importance )
-				// Nothing to do
-				return;
+			global_kdtree.build( global_photon );
 
 			if ( f_high_importance ) {
+				// Trace caustic photons
 				for ( std::uint32_t sample{ 0 }; sample < n_caustic_sample; ++sample )
 					TraceEmission( true );
-				if ( caustic_photon.size() )
-					caustic_kdtree.build( caustic_photon );
-
-				if ( !global_photon.size() && !caustic_photon.size() )
-					// Nothing to do
-					return;
+				// Build caustic photon maps
+				caustic_kdtree.build( caustic_photon );
 			}
 
 			auto const [image_width, image_height] = camera.image_size();
@@ -296,7 +287,7 @@ namespace Integrator {
 								}
 							}
 							// Sample caustic photon map
-							if ( caustic_photon.size() ) {
+							{
 								// Gather k nearest photons
 								auto const [photon_id, largest_radius2] = caustic_kdtree.knn_query( idata.point, n_caustic_gather );
 
@@ -313,7 +304,7 @@ namespace Integrator {
 								}
 							}
 							// Sample indirect (final gathering)
-							if ( n_final_gathering && global_photon.size() ) {
+							if ( n_final_gathering ) {
 								Colour sum{ Colour::Black };
 
 								// Using the already sampled BxDF

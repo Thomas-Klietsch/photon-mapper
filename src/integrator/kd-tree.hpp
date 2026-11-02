@@ -130,6 +130,9 @@ namespace Integrator {
 
 			std::size_t const n_size = photon.size();
 
+			if ( !n_size )
+				return;
+
 			// Convert photon position to internal data type
 			particle = std::vector<Float3>( n_size );
 			for ( std::uint32_t i{ 0 }; i < n_size; ++i )
@@ -150,7 +153,7 @@ namespace Integrator {
 			Double3 const& point,
 			std::float_t const radius
 		) const {
-			if ( radius <= 0 )
+			if ( radius <= 0 || !particle.size() )
 				// Nothing to do
 				return {};
 
@@ -167,7 +170,7 @@ namespace Integrator {
 			Double3 const& point,
 			std::uint16_t const k
 		) const {
-			if ( !k )
+			if ( !k || !particle.size() )
 				// Nothing to do
 				return {};
 
@@ -212,9 +215,9 @@ namespace Integrator {
 			std::sort( index.begin() + start, index.begin() + end,
 				// Using custom Lambda function, with capture
 				[&]( std::uint32_t const id1, std::uint32_t const id2 )
-				{
-					return particle[id1][axis] < particle[id2][axis];
-				} );
+			{
+				return particle[id1][axis] < particle[id2][axis];
+			} );
 
 			// Split index
 			std::uint32_t const centre = start + ( end - start ) / 2u;
